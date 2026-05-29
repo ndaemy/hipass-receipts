@@ -1,0 +1,37 @@
+{
+  "name": "hipass-receipts",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src --ext .ts",
+    "lint:fix": "ESLINT_USE_FLAT_CONFIG=false eslint src --ext .ts --fix",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/bun": "latest",
+    "@types/jsdom": "^28.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.60.0",
+    "@typescript-eslint/parser": "^8.60.0",
+    "@vitest/coverage-v8": "^4.1.7",
+    "eslint": "8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.8.3",
+    "vitest": "^4.1.7"
+  },
+  "dependencies": {
+    "@crxjs/vite-plugin": "2.4.0",
+    "@types/chrome": "^0.1.42",
+    "@types/node": "^25.9.1",
+    "jszip": "3.10.1",
+    "pdf-lib": "1.17.1",
+    "vite": "^8.0.14"
+  }
+}
