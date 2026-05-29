@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.idea/
+.omo/
+.sisyphus/
+/*.mjs
+test-results/
+playwright-report/
+*.tsbuildinfo
+.DS_Store
