@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hi-Pass 영수증 일괄 다운로드</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Hi-Pass 영수증 일괄 다운로드</h1>
+      </header>
+
+      <section class="presets">
+        <button type="button" data-preset="last-5">최근 5일</button>
+        <button type="button" data-preset="last-10">최근 10일</button>
+        <button type="button" data-preset="clear">선택 해제</button>
+      </section>
+
+      <section class="calendar">
+        <div class="calendar-nav">
+          <button type="button" id="prev-month" aria-label="이전 달">◀</button>
+          <span id="month-label" class="month-label"></span>
+          <button type="button" id="next-month" aria-label="다음 달">▶</button>
+        </div>
+        <div class="weekdays">
+          <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+        </div>
+        <div id="calendar-grid" class="calendar-grid"></div>
+      </section>
+
+      <section class="summary">
+        <span id="selected-count" class="selected-count">0건 선택</span>
+        <span id="selected-chips" class="selected-chips"></span>
+      </section>
+
+      <section class="mode">
+        <h2>형식</h2>
+        <label><input type="radio" name="mode" value="pdf-separate" checked /> N개 개별 PDF</label>
+        <label><input type="radio" name="mode" value="pdf-combined" /> 1개 합쳐진 PDF</label>
+        <label><input type="radio" name="mode" value="png-separate" /> N개 개별 PNG</label>
+        <label class="zip-toggle"><input type="checkbox" id="zip-toggle" /> ZIP으로 묶기</label>
+      </section>
+
+      <section class="action">
+        <button type="button" id="download-btn" class="primary" disabled>다운로드</button>
+      </section>
+
+      <section id="progress" class="progress hidden">
+        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+        <p id="progress-label" class="progress-label">대기 중...</p>
+        <button type="button" id="cancel-btn">취소</button>
+      </section>
+
+      <section id="status" class="status" aria-live="polite"></section>
+    </main>
+    <script type="module" src="./index.ts"></script>
+  </body>
+</html>
