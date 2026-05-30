@@ -6,5 +6,6 @@ dist/
 /*.mjs
 test-results/
 playwright-report/
+*.zip
 *.tsbuildinfo
 .DS_Store
