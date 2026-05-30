@@ -32,7 +32,6 @@ dist/
 │   ├── sidepanel/index.html
 │   └── offscreen/render.html
 └── assets/
-    ├── NanumGothic.ttf
     └── ... (chunks)
 ```
 
@@ -80,11 +79,6 @@ dist/
 
 - hipass.co.kr에서 다시 로그인 후 재시도
 - 세션은 20분 idle 시 자동 만료됩니다
-
-### PDF 한글이 깨지는 경우
-
-- `dist/assets/`에 `NanumGothic.ttf`가 있는지 확인
-- 없다면 `bun run build`를 다시 실행
 
 ### 다운로드가 시작되지 않는 경우
 
