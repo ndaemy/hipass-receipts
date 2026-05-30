@@ -120,10 +120,9 @@ export const SWAP_TO_PRINT_AREA_EXPRESSION = `
   const print1 = document.getElementById('print1');
   if (!print1) return { found: false, count: 0, amount: 0 };
   const text = print1.textContent || '';
-  const cm = text.match(/총\\s*([0-9,]+)\\s*건/);
-  const am = text.match(/([0-9,]+)\\s*원/);
-  const count = cm ? parseInt(cm[1].replace(/,/g, ''), 10) : 0;
-  const amount = am ? parseInt(am[1].replace(/,/g, ''), 10) : 0;
+  const sm = text.match(/총\\s*([0-9,]+)\\s*건\\s*[/\\s]*([0-9,]+)\\s*원/);
+  const count = sm ? parseInt(sm[1].replace(/,/g, ''), 10) : 0;
+  const amount = sm ? parseInt(sm[2].replace(/,/g, ''), 10) : 0;
   document.body.innerHTML = print1.innerHTML;
   return { found: true, count: count, amount: amount };
 })()`;

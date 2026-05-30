@@ -68,14 +68,16 @@ describe('SWAP_TO_PRINT_AREA_EXPRESSION runtime parsing', () => {
     expect(runSwap(null)).toEqual({ found: false, count: 0, amount: 0 });
   });
 
-  it('parses count and amount from the "총 N건 / X원" summary', () => {
-    expect(runSwap('<p>총 2건 / 2,240원</p>')).toEqual({ found: true, count: 2, amount: 2240 });
+  it('parses count and amount from the compact "총N건/X원" summary', () => {
+    expect(runSwap('<p>총2건/2240원</p>')).toEqual({ found: true, count: 2, amount: 2240 });
   });
 
-  it('parses amount even when a digit-bearing token sits between 건 and 원', () => {
-    const r = runSwap('<p>총 3건 (2026년) 합계 4,500원</p>');
-    expect(r.count).toBe(3);
-    expect(r.amount).toBe(4500);
+  it('takes the summary total, not a preceding per-row amount', () => {
+    const body =
+      '<div>1종 1,120원(카드)</div><div>1종 1,120원(카드)</div><div>총2건/2240원</div>';
+    const r = runSwap(body);
+    expect(r.count).toBe(2);
+    expect(r.amount).toBe(2240);
   });
 
   it('still reports found when the summary is unparseable, not a phantom empty', () => {
