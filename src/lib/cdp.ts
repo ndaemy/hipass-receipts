@@ -206,16 +206,20 @@ export class CdpDriver {
     return { width: metrics.cssContentSize.width, height: metrics.cssContentSize.height };
   }
 
-  /** Emit the current page as an A4 PDF (base64). `printBackground:true` keeps the hipass watermark. */
+  /**
+   * Emit the current page as an A4 PDF (base64). `printBackground:true` keeps the
+   * hipass background-image watermark (matching the PNG path, which captures it
+   * natively). A4 with 10mm (0.3937in) uniform margins matches the site layout.
+   */
   async printToPdf(): Promise<string> {
     const res = await this.send<PrintOrShotResult>('Page.printToPDF', {
       printBackground: true,
       paperWidth: 8.27,
       paperHeight: 11.69,
-      marginTop: 0.4,
-      marginBottom: 0.4,
-      marginLeft: 0.4,
-      marginRight: 0.4,
+      marginTop: 0.3937,
+      marginBottom: 0.3937,
+      marginLeft: 0.3937,
+      marginRight: 0.3937,
     });
     return res.data;
   }

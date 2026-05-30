@@ -93,6 +93,11 @@ async function runJobInner(spec: JobSpec, post: Postback, ctrl: AbortController)
       }
 
       await cdp.submitNavigate(receiptFormExpression());
+      const receiptProbe = await cdp.evaluate<ListProbe>(LIST_PROBE_EXPRESSION);
+      if (receiptProbe.expired) {
+        post({ type: 'session-expired', jobId: spec.jobId });
+        return;
+      }
       const meta = await cdp.evaluate<ReceiptMeta>(SWAP_TO_PRINT_AREA_EXPRESSION);
       if (!meta.found || meta.count === 0) {
         index += 1;
@@ -131,9 +136,9 @@ async function runJobInner(spec: JobSpec, post: Postback, ctrl: AbortController)
 }
 
 async function capture(cdp: CdpDriver, format: 'pdf' | 'png'): Promise<string> {
+  await cdp.evaluate(WAIT_FOR_RENDER_EXPRESSION, true);
   if (format === 'pdf') return cdp.printToPdf();
 
-  await cdp.evaluate(WAIT_FOR_RENDER_EXPRESSION, true);
   const size = await cdp.getContentSize();
   if (size.height > MAX_PNG_HEIGHT) throw new Error('receipt_too_tall_for_png');
   return cdp.captureScreenshot(size.width, size.height);
