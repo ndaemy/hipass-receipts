@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Korean Hi-pass Receipts Downloader",
+    "description": "Chrome Web Store display name shown to non-Korean locales."
+  },
+  "extDescription": {
+    "message": "Bulk-download hipass.co.kr toll receipts for multiple dates at once as PDF or PNG.",
+    "description": "Chrome Web Store short description shown to non-Korean locales."
+  }
+}

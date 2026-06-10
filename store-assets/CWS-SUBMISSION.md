@@ -1,11 +1,11 @@
 # Chrome Web Store 제출 가이드
 
-이 문서는 hipass-receipts를 Chrome Web Store(CWS)에 제출할 때 대시보드에 입력할 자료를 모아둔 것입니다. 각 항목을 그대로 복사-붙여넣기 하세요.
+이 문서는 하이패스 영수증 다운로더(hipass-receipts 레포)를 Chrome Web Store(CWS)에 제출할 때 대시보드에 입력할 자료를 모아둔 것입니다. 각 항목을 그대로 복사-붙여넣기 하세요.
 
 ## 제출 패키지
 
-- 업로드 ZIP: `hipass-receipts-0.1.0.zip` (레포 루트, `dist/` 내용이 ZIP 루트에 위치, manifest.json이 최상위)
-- 빌드 재생성: `bun run build` 후 `cd dist && zip -r ../hipass-receipts-0.1.0.zip . -x '.*'`
+- 업로드 ZIP: `hipass-receipts-0.2.0.zip` (레포 루트, `dist/` 내용이 ZIP 루트에 위치, manifest.json이 최상위)
+- 빌드 재생성: `bun run build` 후 `cd dist && zip -r ../hipass-receipts-0.2.0.zip . -x '.*'`
 
 ## 사전 준비 (계정)
 
@@ -28,8 +28,13 @@
 ## Store Listing
 
 ### 이름
+
+이름은 `manifest.json`의 `name`(`__MSG_extName__`) + `_locales`로 결정됩니다 (KO/EN 자동 분기).
+- 한국어 로케일: `하이패스 영수증 다운로더`
+- 그 외 로케일(default_locale=en): `Korean Hi-pass Receipts Downloader`
+
 ```
-Hi-Pass 영수증 일괄 다운로드
+하이패스 영수증 다운로더
 ```
 
 ### 간단한 설명 (manifest description, 132자 이내)

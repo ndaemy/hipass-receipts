@@ -1,6 +1,6 @@
 # 개인정보 처리방침 / Privacy Policy
 
-**hipass-receipts** (Chrome 확장 프로그램)
+**하이패스 영수증 다운로더** (Chrome 확장 프로그램)
 최종 수정일 / Last updated: 2026-05-30
 
 ---

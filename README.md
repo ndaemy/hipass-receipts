@@ -1,4 +1,4 @@
-# Hi-Pass 영수증 일괄 다운로드 (Chrome Extension)
+# 하이패스 영수증 다운로더 (Chrome Extension)
 
 hipass.co.kr 통행료 영수증을 **여러 날짜 한 번에** PDF 혹은 PNG로 다운로드하는 Manifest V3 익스텐션입니다.
 

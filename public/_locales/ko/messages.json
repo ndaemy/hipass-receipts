@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "하이패스 영수증 다운로더",
+    "description": "한국어 로케일에 노출되는 Chrome 웹스토어 표시 이름."
+  },
+  "extDescription": {
+    "message": "hipass.co.kr 통행료 영수증을 여러 날짜 한 번에 PDF/PNG로 일괄 다운로드합니다.",
+    "description": "한국어 로케일에 노출되는 Chrome 웹스토어 설명."
+  }
+}
