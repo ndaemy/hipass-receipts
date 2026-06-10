@@ -73,6 +73,7 @@ async function runJobInner(spec: JobSpec, post: Postback, ctrl: AbortController)
     if (format === 'png') await cdp.setViewportWidth(PNG_VIEWPORT_WIDTH);
 
     const pages: DatePage[] = [];
+    const skippedDates: string[] = [];
     let index = 0;
     for (const date of spec.dates) {
       throwIfAborted(signal);
@@ -87,7 +88,11 @@ async function runJobInner(spec: JobSpec, post: Postback, ctrl: AbortController)
         post({ type: 'session-expired', jobId: spec.jobId });
         return;
       }
-      if (!probe.hasForm) {
+      if (!probe.hasForm || probe.empty) {
+        // No form, or a successfully loaded list with zero rows (a day with no
+        // toll passage). Skip BEFORE submitting the batch-print form: submitting
+        // it on an empty page can hang/timeout and surface as a hard error.
+        skippedDates.push(date);
         index += 1;
         continue;
       }
@@ -100,6 +105,8 @@ async function runJobInner(spec: JobSpec, post: Postback, ctrl: AbortController)
       }
       const meta = await cdp.evaluate<ReceiptMeta>(SWAP_TO_PRINT_AREA_EXPRESSION);
       if (!meta.found || meta.count === 0) {
+        // Receipt page resolved but holds no printable receipt for this date.
+        skippedDates.push(date);
         index += 1;
         continue;
       }
@@ -125,9 +132,9 @@ async function runJobInner(spec: JobSpec, post: Postback, ctrl: AbortController)
     }
 
     if (spec.mode.format === 'pdf' && spec.mode.combine) {
-      await emitCombinedPdf(spec, pages, post, signal);
+      await emitCombinedPdf(spec, pages, post, signal, skippedDates);
     } else {
-      await emitSeparateFiles(spec, pages, post, signal);
+      await emitSeparateFiles(spec, pages, post, signal, skippedDates);
     }
   } finally {
     await cdp.detach();
@@ -149,6 +156,7 @@ async function emitCombinedPdf(
   pages: DatePage[],
   post: Postback,
   signal: AbortSignal,
+  skippedDates: string[],
 ): Promise<void> {
   const filename = buildCombinedFilename(
     pages.map((p) => p.date),
@@ -170,7 +178,7 @@ async function emitCombinedPdf(
   });
   await downloadAndWait(resp.blobUrl, resp.filename, signal);
   await releaseBlob(resp.blobUrl);
-  post({ type: 'job-done', jobId: spec.jobId, filenames: [resp.filename] });
+  post(doneMessage(spec.jobId, [resp.filename], skippedDates));
 }
 
 async function emitSeparateFiles(
@@ -178,6 +186,7 @@ async function emitSeparateFiles(
   pages: DatePage[],
   post: Postback,
   signal: AbortSignal,
+  skippedDates: string[],
 ): Promise<void> {
   const format = spec.mode.format;
   const mime = format === 'pdf' ? 'application/pdf' : 'image/png';
@@ -201,7 +210,7 @@ async function emitSeparateFiles(
   }
 
   if (spec.zip) {
-    await emitZip(spec, pages, rendered, post, signal);
+    await emitZip(spec, pages, rendered, post, signal, skippedDates);
     return;
   }
 
@@ -216,7 +225,7 @@ async function emitSeparateFiles(
     await releaseBlob(file.blobUrl);
     filenames.push(file.filename);
   }
-  post({ type: 'job-done', jobId: spec.jobId, filenames });
+  post(doneMessage(spec.jobId, filenames, skippedDates));
 }
 
 async function emitZip(
@@ -225,6 +234,7 @@ async function emitZip(
   rendered: RenderedFile[],
   post: Postback,
   signal: AbortSignal,
+  skippedDates: string[],
 ): Promise<void> {
   post({
     type: 'progress',
@@ -243,7 +253,18 @@ async function emitZip(
   });
   await downloadAndWait(resp.blobUrl, resp.filename, signal);
   await releaseBlob(resp.blobUrl);
-  post({ type: 'job-done', jobId: spec.jobId, filenames: [resp.filename] });
+  post(doneMessage(spec.jobId, [resp.filename], skippedDates));
+}
+
+/**
+ * Build a job-done message, attaching skippedDates only when at least one date
+ * was skipped (empty/no-record day) so the sidepanel can tell the user which
+ * selected dates produced no receipt.
+ */
+function doneMessage(jobId: string, filenames: string[], skippedDates: string[]): SwOutbound {
+  return skippedDates.length > 0
+    ? { type: 'job-done', jobId, filenames, skippedDates }
+    : { type: 'job-done', jobId, filenames };
 }
 
 async function createWorkerWindow(): Promise<{ windowId: number; tabId: number }> {

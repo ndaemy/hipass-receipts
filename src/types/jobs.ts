@@ -42,7 +42,7 @@ export type SwOutbound =
   | { type: 'progress'; progress: JobProgress }
   | { type: 'session-expired'; jobId: string }
   | { type: 'job-error'; jobId: string; phase: JobPhase; error: string }
-  | { type: 'job-done'; jobId: string; filenames: string[] }
+  | { type: 'job-done'; jobId: string; filenames: string[]; skippedDates?: string[] }
   | { type: 'pong' };
 
 export type OutputMime = 'application/pdf' | 'image/png';

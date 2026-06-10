@@ -43,6 +43,30 @@ describe('receiptFormExpression', () => {
   });
 });
 
+describe('receiptFormExpression missing-form guard', () => {
+  function runReceiptSetup(hasHpForm: boolean): unknown {
+    if (hasHpForm) {
+      const form = document.createElement('form');
+      // jsdom: attach an hpForm property the snippet reads off `document`.
+      (document as unknown as { hpForm: HTMLFormElement }).hpForm = form;
+      document.body.appendChild(form);
+    } else {
+      delete (document as unknown as { hpForm?: HTMLFormElement }).hpForm;
+    }
+    // The snippet defines `form` and may set a guard sentinel; eval it and read both.
+    return (0, eval)(`(() => {\n${receiptFormExpression()}\nreturn typeof form === 'undefined' ? null : form;\n})()`);
+  }
+
+  it('does not throw when document.hpForm is undefined (empty-list page)', () => {
+    expect(() => runReceiptSetup(false)).not.toThrow();
+  });
+
+  it('still yields a submittable form when document.hpForm exists', () => {
+    const form = runReceiptSetup(true);
+    expect(form).not.toBeNull();
+  });
+});
+
 describe('page-context expressions', () => {
   it('probe detects login-page redirect and auth-check expiry, plus form presence', () => {
     expect(LIST_PROBE_EXPRESSION).toContain('lginpg.do');
@@ -84,5 +108,51 @@ describe('SWAP_TO_PRINT_AREA_EXPRESSION runtime parsing', () => {
     const r = runSwap('<table><tr><td>영수증</td></tr></table>');
     expect(r.found).toBe(true);
     expect(r.count).toBe(0);
+  });
+});
+
+describe('LIST_PROBE_EXPRESSION runtime empty-list detection', () => {
+  interface ProbeResult {
+    expired: boolean;
+    hasForm: boolean;
+    empty: boolean;
+  }
+  function runProbe(bodyHtml: string, withHpForm: boolean): ProbeResult {
+    history.replaceState({}, '', '/usepculr/UsePculrTabSearchList.do');
+    document.body.innerHTML = bodyHtml;
+    if (withHpForm) {
+      const form = document.createElement('form');
+      (document as unknown as { hpForm: HTMLFormElement }).hpForm = form;
+    } else {
+      delete (document as unknown as { hpForm?: HTMLFormElement }).hpForm;
+    }
+    const raw: unknown = (0, eval)(LIST_PROBE_EXPRESSION);
+    const r = raw as Record<string, unknown>;
+    return {
+      expired: Boolean(r.expired),
+      hasForm: Boolean(r.hasForm),
+      empty: Boolean(r.empty),
+    };
+  }
+
+  it('flags empty:true on the real hipass "요청하신 내역이 없습니다" notice (verified live)', () => {
+    const r = runProbe('<div>요청하신 내역이 없습니다.</div>', true);
+    expect(r.expired).toBe(false);
+    expect(r.empty).toBe(true);
+  });
+
+  it('flags empty:true on the authoritative "사용내역 총 0건" summary (verified live)', () => {
+    const r = runProbe('<div>사용내역 총 0건 / 총액 0원</div>', true);
+    expect(r.empty).toBe(true);
+  });
+
+  it('flags empty:true on the legacy "조회된 내역이 없습니다" notice', () => {
+    const r = runProbe('<div class="no-data">조회된 내역이 없습니다.</div>', true);
+    expect(r.empty).toBe(true);
+  });
+
+  it('flags empty:false when the list has receipt rows (총 2건)', () => {
+    const r = runProbe('<div>사용내역 총 2건 / 총액 3,200원</div><table><tr><td>20260527</td><td>3,500원</td></tr></table>', true);
+    expect(r.empty).toBe(false);
   });
 });

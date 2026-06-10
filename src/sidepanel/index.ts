@@ -1,5 +1,6 @@
 import type { JobSpec, OutputMode, SwInbound, SwOutbound } from '../types/jobs';
 import { lastNDays, monthGrid, shiftMonth, toYYYYMMDD } from './dates';
+import { formatDoneStatus } from './status';
 
 type ModeRadioValue = 'pdf-separate' | 'pdf-combined' | 'png-separate';
 
@@ -161,13 +162,18 @@ function handleSwMessage(msg: SwOutbound): void {
     case 'job-error': {
       setBusy(false);
       activeJobId = null;
+      if (msg.error === 'no_transactions') {
+        // Not a failure: the selected days simply had no toll receipts.
+        setStatus('선택한 날짜에 출력할 영수증이 없습니다.', 'info');
+        return;
+      }
       setStatus(`오류 (${msg.phase}): ${msg.error}`, 'error');
       return;
     }
     case 'job-done': {
       setBusy(false);
       activeJobId = null;
-      setStatus(`완료 — ${msg.filenames.length}개 파일 다운로드됨`, 'success');
+      setStatus(formatDoneStatus(msg.filenames, msg.skippedDates), 'success');
       return;
     }
     case 'pong': {
